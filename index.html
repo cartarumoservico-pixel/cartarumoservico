@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CartaRumo Serviço-IMT | Serviços Online</title>
+<!-- SDK Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Bibliothèques PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--navy:#0b3a6e;--red:#e30613;--ink:#172033;--muted:#64748b;--bg:#f5f7fa;--line:#dce4ee;--white:#fff;--green:#16845b;--shadow:0 12px 35px rgba(11,58,110,.09);--blue-light:#eef6ff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #8bc5ff;outline-offset:2px}
+.site-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.header-inner{max-width:1180px;margin:auto;padding:16px 24px;display:flex;align-items:center;gap:30px}
+.brand{display:flex;align-items:center;gap:12px;color:var(--navy);font-weight:900;letter-spacing:.08em;text-decoration:none;white-space:nowrap}
+.brand svg {width: 45px; height: 45px; flex-shrink: 0;}
+nav{display:flex;margin-left:auto;align-items:center}
+.nav-group{display:flex;gap:24px;align-items:center}
+nav a{color:var(--ink);font-size:14px;font-weight:700;text-decoration:none}nav a:hover{color:var(--red)}
+.btn{border:0;border-radius:9px;padding:12px 18px;font-weight:800;transition:.2s;display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:#07294e;transform:translateY(-1px)}
+.btn-red{background:var(--red);color:#fff}
+.btn-light{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn-ghost{background:transparent;color:var(--navy);padding-left:0}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.menu-btn{display:none;background:none;border:0;color:var(--navy);font-size:25px;margin-left:auto;cursor:pointer;padding:5px;}
+.hero{position:relative;isolation:isolate;background:linear-gradient(135deg,rgba(5,72,145,.94),rgba(4,48,103,.94)),url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop') center/cover;color:#fff;padding:68px 24px 54px;text-align:center;overflow:hidden}
+.hero-inner{max-width:1180px;margin:auto;position:relative;z-index:2}
+.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:900;color:#c8e7ff}
+.hero h1{font-size:clamp(34px,5vw,64px);line-height:1.08;max-width:980px;margin:78px auto 20px;font-weight:900}
+.hero p{max-width:850px;color:#f0f7ff;font-size:clamp(17px,2vw,22px);margin:0 auto 30px}
+.hero-actions{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;z-index:10}
+.hero-actions .btn{min-width:220px;padding:16px 24px;}
+.hero-stats{max-width:780px;margin:50px auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.hero-stat{padding:20px 12px 0;border-top:1px solid rgba(255,255,255,.38);color:#e3f1ff;font-size:14px}
+.hero-stat strong{display:block;color:#fff;font-size:28px;margin-bottom:2px}
+.internal-hero {background: linear-gradient(135deg,rgba(5,72,145,.94),rgba(4,48,103,.94)), url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop') center/cover;color: #fff;padding: 60px 24px;text-align: center;margin-top: -55px;margin-left: -24px;margin-right: -24px;margin-bottom: 45px;}
+.internal-hero h1 { font-size: clamp(28px, 4vw, 48px); font-weight: 900; margin: 15px auto; max-width: 800px; line-height: 1.1; }
+.internal-hero p { font-size: clamp(16px, 2vw, 20px); color: #d8ebff; max-width: 700px; margin: 0 auto; }
+.home-gallery{max-width:1180px;margin:0 auto;padding:28px 24px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.home-gallery-card{position:relative;height:220px;border-radius:16px;overflow:hidden;background:var(--navy);box-shadow:var(--shadow)}
+.gallery-art{position:absolute;inset:0;overflow:hidden;background:linear-gradient(135deg,#0b3a6e,#1672ad)}
+.gallery-art:before{content:"";position:absolute;width:270px;height:270px;right:8%;top:-78%;border:24px solid rgba(255,255,255,.12);border-radius:50%}
+.gallery-art:after{content:"";position:absolute;width:34%;height:145%;left:42%;top:-20%;transform:rotate(24deg);background:repeating-linear-gradient(to bottom,transparent 0 24px,rgba(255,255,255,.58) 24px 38px,transparent 38px 62px);opacity:.55}
+.gallery-art span{position:absolute;z-index:1;top:14px;left:18px;color:rgba(255,255,255,.62);font-size:42px;font-weight:900;letter-spacing:.04em}
+.art-theory{background:linear-gradient(135deg,#10446f,#2087a3)}
+.art-practice{background:linear-gradient(135deg,#0b3a6e,#1672ad)}
+.art-test{background:linear-gradient(135deg,#173b63,#496b9b)}
+.art-license{background:linear-gradient(135deg,#0c4c58,#16845b)}
+.home-gallery-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(4,29,60,.9))}
+.home-gallery-caption{position:absolute;z-index:1;left:18px;right:18px;bottom:16px;color:#fff}
+.home-gallery-caption strong{display:block;font-size:18px}
+.home-gallery-caption span{font-size:12px;color:#d8ebff}
+.main{max-width:1180px;margin:0 auto;padding:55px 24px 80px}
+.section-head{text-align:center;margin-bottom:32px}
+.section-head h2{font-size:clamp(28px,4vw,40px);margin:0 0 8px;color:var(--navy)}
+.section-head p{color:var(--muted);margin:0}
+.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.service-card,.form-shell,.success-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.service-card{padding:34px;position:relative;overflow:hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;}
+.service-card:hover {transform: translateY(-5px); box-shadow: 0 15px 40px rgba(11,58,110,.15);}
+.service-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--red)}
+.service-number{color:var(--red);font-weight:900;font-size:13px}
+.service-card h3{color:var(--navy);font-size:25px;margin:12px 0 8px}
+.service-card p{color:var(--muted);min-height:48px}
+.service-card .btn{margin-top:18px}
+.view{display:none;animation:appear .3s ease}.view.active{display:block}
+@keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.form-shell{max-width:1080px;margin:auto;padding:34px}
+.form-title{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:28px}
+.form-title h2{margin:0;color:var(--navy);font-size:32px}
+.form-title p{color:var(--muted);margin:7px 0}
+.step{display:none}.step.active{display:block;animation:appear .25s ease}
+.step h3{color:var(--navy);font-size:23px;margin:0 0 5px}
+.step-intro{color:var(--muted);margin-top:0}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}
+.field{min-width:0}.field.full{grid-column:1/-1}
+label{display:block;font-weight:800;font-size:13px;margin-bottom:7px}
+label .optional{font-weight:500;color:var(--muted)}
+input,select,textarea{width:100%;border:1px solid #cbd6e2;border-radius:8px;padding:12px 13px;background:#fff;color:var(--ink)}
+input:invalid:not(:placeholder-shown),select.invalid,textarea.invalid{border-color:var(--red)}
+textarea{min-height:80px;resize:vertical}
+.help-text { display: block; font-size: 11px; color: var(--muted); margin-top: 5px; font-weight: 500; }
+.error{display:block;min-height:18px;color:var(--red);font-size:12px;margin-top:4px}
+.hidden{display:none!important}
+.step-actions{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);margin-top:30px;padding-top:22px}
+.category-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:22px}
+.category{border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left;padding:17px 13px;min-height:78px;position:relative;transition:.2s}
+.category:hover,.category.selected{border-color:var(--navy);box-shadow:0 7px 18px rgba(11,58,110,.12);transform:translateY(-2px)}
+.category.selected{background:#eef6ff}
+.category.selected:after{content:"✓";position:absolute;right:9px;top:7px;color:var(--green);font-weight:900}
+.category strong{display:block;color:var(--navy);font-size:19px}
+.category small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.upload-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.upload{border:1px dashed #aabbd0;border-radius:12px;padding:18px;background:#fbfdff}
+.upload.required{border-color:var(--red);background:#fff8f8}
+.upload-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.upload-icon{width:36px;height:36px;border-radius:9px;background:#e7f1fc;display:grid;place-items:center;color:var(--navy);font-weight:900}
+.upload.required .upload-icon{background:#ffe4e6;color:var(--red)}
+.upload-name{font-weight:800}
+.upload-info{font-size:12px;color:var(--muted);margin-top:9px;min-height:18px;overflow-wrap:anywhere}
+.upload input[type=file]{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.upload input:focus-visible+label{outline:3px solid #8bc5ff;outline-offset:2px}
+.upload label{display:inline-block;color:var(--navy);border:1px solid #b9c9da;padding:9px 12px;border-radius:7px;background:#fff;cursor:pointer;margin-bottom:0}
+.remove-file{border:0;background:none;color:var(--red);font-size:12px;font-weight:800;margin-left:8px}
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.summary-card{border:1px solid var(--line);border-radius:12px;padding:18px}
+.summary-card h4{display:flex;justify-content:space-between;align-items:center;color:var(--navy);margin:0 0 12px}
+.summary-card button{border:0;background:none;color:var(--red);font-size:12px;font-weight:900}
+.summary-card dl{display:grid;grid-template-columns:130px 1fr;gap:7px;margin:0;font-size:13px}
+.summary-card dt{color:var(--muted);font-weight:700}
+.summary-card dd{margin:0;overflow-wrap:anywhere}
+.checkline{display:flex;gap:10px;align-items:flex-start;margin-top:15px;font-size:14px;}
+.checkline input{width:auto;margin-top:4px;cursor:pointer}
+.success-card{max-width:650px;margin:35px auto;padding:48px;text-align:center}
+.success-icon{width:72px;height:72px;border-radius:50%;background:#dff6eb;color:var(--green);display:grid;place-items:center;font-size:38px;font-weight:900;margin:0 auto 20px}
+.success-card h2{color:var(--navy);margin:0;font-size:32px}
+.success-card p{color:var(--muted)}
+.faq-section{max-width:1180px;margin:0 auto;padding:0 24px 58px}
+@media(max-width:960px){.home-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.home-gallery{grid-template-columns:1fr}}
+.faq-list{max-width:850px;margin:0 auto;display:grid;gap:12px}
+.faq-list details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:17px 20px;box-shadow:var(--shadow)}
+.faq-list summary{color:var(--navy);font-weight:800;cursor:pointer}
+.faq-list details p{margin:12px 0 0;color:var(--muted);font-size:14px}
+.auth-shell{max-width:960px;padding:0;overflow:hidden}
+.auth-layout{display:grid;grid-template-columns:.9fr 1.1fr;min-height:520px}
+.auth-aside{padding:42px;background:linear-gradient(145deg,#0b3a6e,#07294e);color:#fff;display:flex;flex-direction:column;justify-content:center}
+.auth-aside h2{color:#fff;font-size:30px;line-height:1.2;margin:0 0 15px}
+.auth-aside p{color:#e1efff;margin:0 0 22px;font-size:15px}
+.auth-benefits{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.auth-benefits li{display:flex;gap:12px;align-items:flex-start;color:#f0f7ff;font-size:14px;line-height:1.4}
+.auth-benefits li:before{content:"✓";flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-weight:900;font-size:12px;margin-top:2px}
+.auth-content{padding:42px}
+.auth-content .form-title{margin-bottom:20px}
+.auth-content .field{margin-bottom:15px}
+.auth-tabs{display:flex;gap:10px;margin-bottom:22px}
+.auth-tabs .btn{flex:1}
+.date-group { display: flex; gap: 8px; flex-wrap: nowrap; }
+.date-group select { flex: 1; min-width: 0; padding: 12px 10px; }
+.phone-group { display: flex; gap: 10px; }
+.phone-group select { width: 100px; flex-shrink: 0; }
+.password-wrapper { position: relative; }
+.password-wrapper input { padding-right: 40px; }
+.toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 5px; }
+.toggle-password:hover { color: var(--navy); }
+.step-indicator { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; }
+.otp-input { font-size: 24px; letter-spacing: 8px; text-align: center; font-weight: 700; padding: 15px; }
+.timer-text { font-size: 13px; color: var(--muted); margin: 10px 0; }
+.resend-btn { background: none; border: none; color: var(--navy); font-weight: 800; cursor: pointer; text-decoration: underline; font-size: 13px; }
+.resend-btn:disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }
+.dashboard-section-title { font-size: 22px; font-weight: 900; color: var(--navy); margin: 0 0 20px; display: flex; align-items: center; gap: 10px; }
+.dashboard-section-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.dash-card { background: #fff; border-radius: 20px; padding: 35px 30px; border: 1px solid var(--line); box-shadow: 0 4px 20px rgba(11,58,110,.03); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.dash-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(11,58,110,.08); border-color: #b9d7f3; }
+.dash-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--navy); opacity: 0; transition: opacity 0.3s ease; }
+.dash-card:hover::before { opacity: 1; }
+.dash-card-icon { width: 60px; height: 60px; border-radius: 16px; background: var(--blue-light); color: var(--navy); display: grid; place-items: center; margin-bottom: 24px; transition: transform 0.3s ease; }
+.dash-card:hover .dash-card-icon { transform: scale(1.05); }
+.dash-card-icon svg { width: 30px; height: 30px; }
+.dash-card h3 { margin: 0 0 12px; font-size: 22px; color: var(--navy); font-weight: 800; }
+.dash-card p { margin: 0 0 30px; font-size: 14px; color: var(--muted); line-height: 1.6; flex: 1; }
+.dash-card .btn { width: 100%; padding: 16px; font-size: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; border-radius: 12px; background: linear-gradient(135deg, var(--navy), #165a9c); box-shadow: 0 4px 12px rgba(11,58,110,.2); transition: all 0.3s ease; }
+.dash-card .btn:hover { background: linear-gradient(135deg, #165a9c, var(--navy)); box-shadow: 0 6px 16px rgba(11,58,110,.3); transform: translateY(-2px); }
+.custom-timeline { position: relative; padding-left: 20px; }
+.custom-timeline::before { content: ""; position: absolute; left: 35px; top: 20px; bottom: 20px; width: 4px; background: var(--line); border-radius: 2px; }
+.timeline-item { position: relative; display: flex; gap: 20px; margin-bottom: 24px; background: transparent; border: none; padding: 0; box-shadow: none; }
+.timeline-item:last-child { margin-bottom: 0; }
+.timeline-icon { width: 34px; height: 34px; border-radius: 50%; background: #f1f5f9; border: 4px solid #fff; display: grid; place-items: center; font-weight: 900; font-size: 14px; color: var(--muted); position: relative; z-index: 2; box-shadow: 0 0 0 1px var(--line); margin-left: 2px; }
+.timeline-item.completed .timeline-icon { background: var(--green); color: #fff; box-shadow: 0 0 0 1px var(--green); }
+.timeline-item.current .timeline-icon { background: var(--navy); color: #fff; box-shadow: 0 0 0 1px var(--navy); }
+.timeline-item.current::before { content: ""; position: absolute; left: 35px; top: 34px; bottom: -24px; width: 4px; background: var(--navy); z-index: 1; }
+.timeline-content { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; flex: 1; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+.timeline-content h4 { margin: 0 0 6px; color: var(--navy); font-size: 18px; }
+.timeline-content p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+.timeline-item.locked .timeline-content { opacity: 0.6; background: #f8fafc; }
+.footer{background:#0a294a;color:#d6e4f2;padding:38px 24px;text-align:center}
+.footer-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;gap:20px;align-items:center;text-align:left;}
+.footer strong{color:#fff;font-size:18px}
+.footer p{margin:6px 0;font-size:13px}
+.footer a{color:#fff;margin-left:18px;font-size:13px}
+.footer a:first-child{margin-left:0}
+.info-section{max-width:1180px;margin:0 auto;padding:30px 24px 55px}
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.info-grid article{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow)}
+.info-grid strong{color:var(--red);font-size:13px}
+.info-grid h3{color:var(--navy);font-size:18px;margin:9px 0 6px}
+.info-grid p,.faq-list p{color:var(--muted);margin:0;font-size:14px}
+.quiz-progress{max-width:720px;margin:0 auto 22px;text-align:center;color:var(--muted);font-size:14px;font-weight:700}
+.quiz-question{max-width:720px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px}
+.quiz-question h3{margin:0 0 18px;color:var(--navy);font-size:20px}
+.quiz-options{display:grid;gap:10px}
+.quiz-option{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff;text-align:left;font-size:15px;transition:.15s}
+.quiz-option:hover:not(:disabled){border-color:var(--navy);background:#f1f7ff}
+.quiz-option:disabled{cursor:default;opacity:.95}
+.quiz-option.correct{background:#dff6eb;border-color:var(--green);color:#0f5132;font-weight:700}
+.quiz-option.wrong{background:#fff0f0;border-color:var(--red);color:#a4121a}
+.quiz-feedback{margin-top:14px;font-weight:700;min-height:22px}
+.legal-accordion-container { max-width: 900px; margin: 40px auto 0; text-align: left; border-top: 1px solid rgba(255,255,255,.15); padding-top: 25px; }
+.legal-accordion-container details { background: transparent; border: none; margin: 0; box-shadow: none; }
+.legal-accordion-container summary { font-size: 20px; font-weight: 900; color: #fff; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 0; transition: color 0.2s; }
+.legal-accordion-container summary:hover { color: #c8e7ff; }
+.legal-accordion-container summary::-webkit-details-marker { display: none; }
+.legal-accordion-container summary:after { content: "▼"; font-size: 14px; transition: transform 0.3s ease; }
+.legal-accordion-container details[open] summary:after { transform: rotate(180deg); }
+.legal-content { margin-top: 15px; font-size: 13px; color: #b9cde0; line-height: 1.7; background: rgba(0,0,0,0.2); padding: 24px; border-radius: 12px; animation: appear .3s ease; }
+.legal-content h3 { color: #fff; font-size: 16px; margin: 15px 0 10px; }
+.legal-content p { margin: 0 0 12px; }
+.legal-content a { color: #fff; text-decoration: underline; margin: 0; }
+/* Styles spécifiques pour l'Admin et le Profil */
+.data-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13px; }
+.data-table th { background: #f8fafc; color: var(--navy); font-weight: 800; }
+.data-table select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); width: auto; margin: 0; }
+@media(max-width:760px){ .data-table { display: block; overflow-x: auto; white-space: nowrap; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#" onclick="event.preventDefault();handleLogoClick()">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 70 25 A 35 35 0 1 0 70 75" stroke="#0b3a6e" stroke-width="10" fill="none" stroke-linecap="round" />
+          <path d="M 45 40 L 45 70 M 45 40 L 60 40 A 10 10 0 0 1 60 60 L 45 60 L 65 70" stroke="#e30613" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="75" cy="50" r="5" fill="#e30613" />
+      </svg>
+      <span>CartaRumo Serviço-IMT</span>
+    </a>
+    <button type="button" class="menu-btn" id="menuBtn" aria-label="Abrir menu" onclick="document.getElementById('mainNav').classList.toggle('open')">☰</button>
+    <nav id="mainNav">
+      <div id="navPublic" class="nav-group">
+        <a href="#" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showPublicHome()">Início</a>
+        <a href="#" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showPublicHome();setTimeout(()=>document.getElementById('como-funciona')?.scrollIntoView({behavior:'smooth'}),50)">Como funciona</a>
+        <a href="#" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showPublicHome();setTimeout(()=>document.getElementById('perguntas')?.scrollIntoView({behavior:'smooth'}),50)">FAQ</a>
+        <button type="button" class="btn btn-light nav-auth" onclick="openAuth()">Iniciar sessão</button>
+      </div>
+      <div id="navPrivate" class="nav-group hidden">
+        <a href="#" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showServices()">Serviços Online</a>
+        <a href="#" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showPersonalArea()">O meu processo</a>
+        <a href="#" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showProfile()">Meu Perfil</a>
+        <a href="#" id="navAdminLink" class="hidden" style="color:var(--red);" onclick="event.preventDefault();document.getElementById('mainNav').classList.remove('open');showAdminPanel()">Admin</a>
+        <button type="button" class="btn btn-light nav-auth" onclick="logout()">Terminar sessão</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div id="loadingOverlay" class="hidden">
+    <div class="spinner"></div>
+    <p>A processar...</p>
+</div>
+
+<div id="publicHomeView" class="view">
+  <section class="hero" id="inicio">
+    <div class="hero-inner">
+      <span class="eyebrow">Serviços Online</span>
+      <h1>O seu percurso para obter a carta de condução</h1>
+      <p>Conheça as etapas de formação para conduzir e aceda aos serviços online para gerir o seu processo connosco.</p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-red" onclick="openAuth()">Iniciar Sessão / Registar</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>4 etapas</strong><span>no percurso de formação</span></div>
+        <div class="hero-stat"><strong>Acompanhamento</strong><span>consulte o estado do seu processo</span></div>
+        <div class="hero-stat"><strong>Gestão digital</strong><span>trate das suas diligências online</span></div>
+      </div>
+    </div>
+  </section>
+  <!-- ... (Gallery et FAQ restent inchangés) ... -->
+  <section class="home-gallery" aria-label="Etapas do percurso de formação">
+    <article class="home-gallery-card"><div class="gallery-art art-practice" aria-hidden="true"><span>01</span></div><div class="home-gallery-caption"><strong>Aulas práticas</strong><span>Conduza com acompanhamento</span></div></article>
+    <article class="home-gallery-card"><div class="gallery-art art-theory" aria-hidden="true"><span>02</span></div><div class="home-gallery-caption"><strong>Formação teórica</strong><span>Prepare o exame de código</span></div></article>
+    <article class="home-gallery-card"><div class="gallery-art art-test" aria-hidden="true"><span>03</span></div><div class="home-gallery-caption"><strong>Exame</strong><span>Realize a sua prova</span></div></article>
+    <article class="home-gallery-card"><div class="gallery-art art-license" aria-hidden="true"><span>04</span></div><div class="home-gallery-caption"><strong>Diligências</strong><span>Renove ou substitua a sua carta</span></div></article>
+  </section>
+  <section class="info-section" id="como-funciona">
+    <div class="section-head"><span class="eyebrow">Processo simples</span><h2>Como funciona</h2><p>As etapas do seu percurso de formação.</p></div>
+    <div class="info-grid">
+      <article><strong>01</strong><h3>Inscrição</h3><p>Submeta os seus dados e documentos iniciais.</p></article>
+      <article><strong>02</strong><h3>Formação teórica</h3><p>Realize o teste de código na nossa plataforma.</p></article>
+      <article><strong>03</strong><h3>Aulas práticas</h3><p>Conduza com o acompanhamento do seu instrutor.</p></article>
+      <article><strong>04</strong><h3>Exame e emissão</h3><p>Conclua o processo e receba a sua carta.</p></article>
+    </div>
+  </section>
+  <section class="faq-section" id="perguntas">
+    <div class="section-head"><span class="eyebrow">Ajuda</span><h2>Perguntas frequentes</h2><p>Informações úteis sobre os nossos serviços.</p></div>
+    <div class="faq-list">
+      <details><summary>Como faço a minha inscrição?</summary><p>Aceda à sua conta, selecione "Inscrição – Aulas de Condução" e preencha os dados solicitados. O seu dossier será criado na plataforma.</p></details>
+      <details><summary>Que documentos preciso de enviar?</summary><p>No formulário, ser-lhe-á pedido o documento de identificação, fotografia e comprovativo de morada. Poderá carregar estes ficheiros diretamente na plataforma.</p></details>
+      <details><summary>Como acompanho o meu processo?</summary><p>Na sua Área do Aluno, tem acesso à linha do tempo do seu processo, onde pode ver as etapas concluídas e as que estão em curso.</p></details>
+      <details><summary>Como trato de uma renovação ou substituição?</summary><p>Na Área do Aluno ou na página de serviços, selecione a opção "Renovação ou Substituição" e escolha o motivo pretendido.</p></details>
+    </div>
+  </section>
+</div>
+
+<main class="main">
+  <section id="authView" class="view">
+    <!-- Le code d'authentification reste identique -->
+    <div class="form-shell auth-shell">
+      <div class="auth-layout">
+        <aside class="auth-aside">
+          <h2>Bem-vindo à CartaRumo Serviços-IMT!</h2>
+          <p>Aceda aos serviços disponíveis, submeta os seus pedidos relacionados com a carta de condução e acompanhe o estado dos seus processos de forma simples e eficiente.</p>
+          <ul class="auth-benefits">
+            <li><strong>Obtenção da Carta de Condução</strong> — Inicie o processo para obter a sua carta de condução.</li>
+            <li><strong>Renovação ou Substituição</strong> — Solicite a renovação ou a substituição da sua carta de condução.</li>
+            <li><strong>Acompanhamento de Processos</strong> — Consulte o estado dos seus pedidos e acompanhe o respetivo progresso.</li>
+          </ul>
+        </aside>
+        <div class="auth-content">
+          <div class="form-title"><div><h2>Aceder à conta</h2><p>Introduza as suas credenciais para continuar.</p></div></div>
+          <div class="auth-tabs">
+            <button type="button" class="btn btn-primary" id="loginTab" onclick="setAuthMode('login')">Iniciar sessão</button>
+            <button type="button" class="btn btn-light" id="registerTab" onclick="setAuthMode('register')">Criar conta</button>
+          </div>
+          <form id="authForm" novalidate>
+            <div id="loginFields">
+              <div class="field"><label for="loginEmail">E-mail *</label><input id="loginEmail" type="email" autocomplete="email" placeholder="nome@exemplo.pt" required><span class="error"></span></div>
+              <div class="field" style="margin-bottom:5px;"><label for="loginPassword">Palavra-passe *</label>
+                <div class="password-wrapper">
+                  <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Mínimo de 6 caracteres" minlength="6" required>
+                  <button type="button" class="toggle-password" onclick="togglePassword('loginPassword')">👁️</button>
+                </div>
+                <span class="error"></span>
+              </div>
+              <label class="checkline"><input id="authRemember" type="checkbox"><span>Lembrar deste dispositivo</span></label>
+              <span class="error" id="loginError"></span>
+              <button type="button" class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitLogin()">Continuar</button>
+            </div>
+            <div id="regStep1" class="hidden">
+              <span class="step-indicator">Passo 1 de 2: Informações Pessoais</span>
+              <div class="field"><label for="regName">Nome *</label><input id="regName" placeholder="Ex: João" required><span class="error"></span></div>
+              <div class="field"><label for="regSurname">Apelido *</label><input id="regSurname" placeholder="Ex: Silva" required><span class="error"></span></div>
+              <div class="field"><label>Data de Nascimento *</label><div class="date-group"><select id="regDay" required><option value="">Dia</option></select><select id="regMonth" required><option value="">Mês</option></select><select id="regYear" required><option value="">Ano</option></select></div><span class="error" id="regDateError"></span></div>
+              <button type="button" class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="nextRegStep1()">Continuar</button>
+            </div>
+            <div id="regStep2" class="hidden">
+              <span class="step-indicator">Passo 2 de 2: Contacto e Segurança</span>
+              <div class="field"><label for="regEmail">E-mail *</label><input id="regEmail" type="email" placeholder="nome@exemplo.pt" required><span class="error"></span></div>
+              <div class="field"><label>Telemóvel *</label><div class="phone-group"><select id="regCountryCode"><option value="+351" selected>+351 (PT)</option></select><input id="regPhone" type="tel" placeholder="912 345 678" required></div><span class="error" id="regPhoneError"></span></div>
+              <div class="field"><label for="regPassword">Palavra-passe *</label><div class="password-wrapper"><input id="regPassword" type="password" placeholder="Mínimo de 6 caracteres" minlength="6" required><button type="button" class="toggle-password" onclick="togglePassword('regPassword')">👁️</button></div><span class="error"></span></div>
+              <div class="field"><label for="regPasswordConfirm">Confirmar palavra-passe *</label><div class="password-wrapper"><input id="regPasswordConfirm" type="password" placeholder="Repita a palavra-passe" minlength="6" required><button type="button" class="toggle-password" onclick="togglePassword('regPasswordConfirm')">👁️</button></div><span class="error"></span></div>
+              <label class="checkline"><input id="regPrivacy" type="checkbox" required><span>Li e aceito a <a href="#legal-section" onclick="document.querySelector('.legal-accordion-container details').open = true; return false;">Política de Privacidade</a>.</span></label>
+              <span class="error" id="regError"></span>
+              <div style="display:flex; gap:10px; margin-top:20px;"><button type="button" class="btn btn-light" onclick="prevRegStep2()" style="flex:1;">Voltar</button><button type="button" class="btn btn-primary" onclick="submitRegister()" style="flex:2;">Inscrever</button></div>
+            </div>
+            <div id="regConfirmEmail" class="hidden" style="text-align:center; padding:20px 0;">
+              <div class="success-icon" style="background:#eef6ff; color:var(--navy); font-size:32px;">✉️</div>
+              <h3 style="color:var(--navy); margin-bottom:10px;">Confirme o seu e-mail</h3>
+              <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Enviámos um código de 6 dígitos para <strong id="otpEmailDisplay"></strong>.</p>
+              <div class="field" style="margin-bottom:10px;"><input type="text" id="otpCodeInput" class="otp-input" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="one-time-code"><span class="error" id="otpError"></span></div>
+              <div class="timer-text">O código expira em: <strong id="otpTimerDisplay">02:00</strong></div>
+              <button type="button" class="resend-btn" id="resendOtpBtn" onclick="resendOtp()" disabled>Reenviar código</button>
+              <button type="button" class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="verifyOtp()">Validar Código</button>
+            </div>
+          </form>
+          <button type="button" class="btn btn-ghost" onclick="showPublicHome()" style="margin-top:15px;">← Voltar ao início</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="servicesView" class="view">
+    <div class="internal-hero"><span class="eyebrow">Serviços Online</span><h1>O seu percurso para obter a carta de condução</h1><p>Conheça as etapas de formação para conduzir e aceda aos serviços online para gerir o seu processo connosco.</p></div>
+    <div class="form-shell" style="padding-top: 0; padding-bottom: 0;">
+      <div class="dashboard-section-title">Serviços de Carta de Condução</div>
+      <div class="service-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 40px;">
+        <article class="dash-card" onclick="startFlow('obtencao')">
+          <div class="dash-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+          <h3>Obtenção de Carta</h3>
+          <p>Efetue o pedido da sua carta de condução. Encarregamo-nos da emissão do seu certificado de qualificação junto do IMT.</p>
+          <button type="button" class="btn btn-primary">Iniciar pedido <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        </article>
+        <article class="dash-card" onclick="startFlow('renovacao')">
+          <div class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg></div>
+          <h3>Renovação de Carta</h3>
+          <p>Solicite a renovação periódica do seu título de condução.</p>
+          <button type="button" class="btn btn-primary">Iniciar pedido <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        </article>
+        <article class="dash-card" onclick="startFlow('substituicao')">
+          <div class="dash-card-icon" style="background: #fee2e2; color: var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+          <h3>Substituição de Carta</h3>
+          <p>Solicite uma segunda via do seu título por perda ou extravio.</p>
+          <button type="button" class="btn btn-primary">Iniciar pedido <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        </article>
+      </div>
+      <div class="dashboard-section-title">Formação de Condutores</div>
+      <div class="service-grid" style="margin-bottom: 40px;">
+        <article class="dash-card" onclick="startFlow('inscricao')" style="grid-column: 1 / -1; display: flex; flex-direction: row; align-items: center; gap: 30px;">
+          <div class="dash-card-icon" style="background: #ffebee; color: var(--red); margin-bottom: 0; flex-shrink: 0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+          <div style="flex: 1;"><h3 style="margin-top: 0;">Inscrição – Aulas de Condução</h3><p style="margin-bottom: 0;">Inicie a sua formação connosco. Inclui aulas de código, aulas práticas e acompanhamento até ao exame.</p></div>
+          <button type="button" class="btn btn-primary" style="width: auto; padding: 16px 30px;">Iniciar pedido <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="personalView" class="view">
+    <div class="form-shell" style="padding-top: 0;">
+      <div class="form-title" style="margin-bottom:20px;">
+        <div><span class="eyebrow">Área do Aluno</span><h2>O meu processo</h2><p>Acompanhe o progresso da sua carta de condução.</p></div>
+        <div class="success-actions" style="margin:0"><button type="button" class="btn btn-light" onclick="showServices()">Voltar aos serviços</button></div>
+      </div>
+      <div id="noProcessMessage" class="hidden">
+        <div style="text-align: center; padding: 40px 20px; background: #fff; border-radius: 20px; border: 1px dashed var(--line);">
+          <h3 style="color: var(--navy); font-size: 22px; margin-bottom: 10px;">Ainda não tem processos em curso</h3>
+          <p style="color: var(--muted); margin-bottom: 25px;">Inicie uma nova inscrição ou trate das diligências da sua carta.</p>
+          <button type="button" class="btn btn-primary" onclick="showServices()">Iniciar um novo serviço</button>
+        </div>
+      </div>
+      <div id="progressSection" class="hidden"><div id="dashboardContainer" class="custom-timeline"></div></div>
+    </div>
+  </section>
+
+  <!-- NOUVELLE SECTION : PROFIL UTILISATEUR -->
+  <section id="profileView" class="view">
+    <div class="form-shell">
+      <div class="form-title">
+        <div><span class="eyebrow">Conta</span><h2>Meu Perfil</h2><p>Gerencie os seus dados pessoais.</p></div>
+        <button type="button" class="btn btn-light" onclick="showPersonalArea()">← Voltar</button>
+      </div>
+      <form id="profileForm" novalidate>
+        <div class="fields">
+          <div class="field full"><label>Nome Completo</label><input id="pFullName" disabled></div>
+          <div class="field"><label>NIF</label><input id="pNif"></div>
+          <div class="field"><label>Data de Nascimento</label><input id="pBirthDate" type="date"></div>
+          <div class="field"><label>Telemóvel</label><input id="pPhone" type="tel"></div>
+          <div class="field full"><label>E-mail (Não editável)</label><input id="pEmail" disabled style="background:#f1f5f9;"></div>
+          <div class="field full"><label>Endereço Completo</label><input id="pAddress"></div>
+          <div class="field">
+            <label>Código Postal</label>
+            <input id="pPostalCode" placeholder="0000-000" maxlength="8" oninput="fetchPostalCodeProfile(this.value)">
+          </div>
+          <div class="field"><label>Localidade / Cidade</label><input id="pCity"></div>
+        </div>
+        <div class="step-actions">
+          <div></div>
+          <button type="button" class="btn btn-primary" onclick="saveProfile()">Guardar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- NOUVELLE SECTION : ADMIN -->
+  <section id="adminView" class="view">
+    <div class="form-shell" style="max-width: 1200px;">
+      <div class="form-title">
+        <div><span class="eyebrow">Gestão Interna</span><h2>Painel de Administração</h2><p>Gestão de todas as solicitações da plataforma.</p></div>
+        <button type="button" class="btn btn-light" onclick="showPersonalArea()">← Voltar</button>
+      </div>
+      <div id="adminTableContainer">
+        <p style="text-align:center; color:var(--muted);">A carregar pedidos...</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="applicationView" class="view"></section>
+
+  <section id="testView" class="view">
+    <div class="form-shell">
+      <div class="form-title"><div><button type="button" class="btn btn-ghost" onclick="showPersonalArea()">← Voltar ao painel</button><span class="eyebrow">Formação Teórica</span><h2>Avaliação Teórica</h2><p>Questionário de avaliação. Acerte em todas para avançar.</p></div></div>
+      <div id="quizContainer"></div>
+    </div>
+  </section>
+
+  <section id="successView" class="view">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h2>Pedido recebido!</h2>
+      <p>O seu pedido foi registado com sucesso e encontra-se agora em processo de análise.</p>
+      <div style="margin-top: 30px; text-align: left; border-top: 1px solid var(--line); padding-top: 20px;">
+        <h3 style="color: var(--navy); margin-bottom: 15px;">Resumo do Pedido</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+            <div><strong style="color: var(--muted);">Número do Pedido:</strong><br><span id="succProtocol" style="font-weight: 800; color: var(--navy); font-size: 18px;"></span></div>
+            <div><strong style="color: var(--muted);">Data:</strong><br><span id="succDate" style="font-weight: 600;"></span></div>
+            <div><strong style="color: var(--muted);">Serviço:</strong><br><span id="succService" style="font-weight: 600;"></span></div>
+            <div><strong style="color: var(--muted);">Candidato:</strong><br><span id="succCandidate" style="font-weight: 600;"></span></div>
+        </div>
+      </div>
+      <div style="margin-top: 30px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <p style="margin: 0; color: var(--ink); font-weight: 600;">IMPORTANT: Descarregue o seu comprovativo em PDF.</p>
+      </div>
+      <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 20px; padding: 16px;" onclick="downloadReceipt()">📄 Descarregar Comprovativo</button>
+      <button type="button" class="btn btn-light" style="width: 100%; margin-top: 10px;" onclick="showPersonalArea()">Ir para o meu painel</button>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" id="contactos">
+  <div class="footer-inner">
+    <div><strong>CartaRumo Serviço-IMT</strong><p>Serviços de formação e apoio à condução.</p></div>
+    <div class="footer-links"><p style="margin-bottom:12px;">Contactos</p><p>E-mail: <a href="mailto:cartarumoimt@gmail.com">cartarumoimt@gmail.com</a></p><p>© 2026 CartaRumo.</p></div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://nffxzlfduxyvdrgmwdhu.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_IiLj9306XpVb2EC4t9bJmA_eiALowxk';
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const categories={A1:'Motociclos 125cm³',A2:'Motociclos limitados',A:'Motociclos',B:'Automóveis ligeiros',BE:'Automóveis com reboque'};
+const categoryList=Object.keys(categories);
+let currentUser=null;
+let currentUserProfile=null; // Stocke le profil en mémoire
+let currentUserApplications = [];
+const applicationState = { service: '', step: 1, category: '', files: {}, isMinor: false, isA1: false };
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let otpTimerInterval = null;
+const OTP_TIME_LIMIT = 120;
+let lastSubmission = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  initDateDropdowns();
+  buildUnifiedForm();
+  
+  try {
+    const rem = localStorage.getItem('cartarumoimt_remember');
+    if(rem) { $('loginEmail').value = rem; $('authRemember').checked = true; }
+  } catch(e){}
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+      currentUser = session.user;
+      // On charge le profil à chaque connexion
+      await loadUserProfile();
+    } else {
+      currentUser = null;
+      currentUserProfile = null;
+    }
+    updateAuthNav();
+  });
+  setAuthMode('login');
+  showPublicHome();
+});
+
+// CHARGEMENT DU PROFIL
+async function loadUserProfile() {
+    const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+    if(!error && data) {
+        currentUserProfile = data;
+        // Mettre à jour le lien Admin dans le menu
+        if(data.is_admin) { $('navAdminLink').classList.remove('hidden'); }
+        else { $('navAdminLink').classList.add('hidden'); }
+    }
+}
+
+function initDateDropdowns() {
+  const daySel = $('regDay'), monthSel = $('regMonth'), yearSel = $('regYear');
+  for(let i=1; i<=31; i++) daySel.innerHTML += `<option value="${i}">${i}</option>`;
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  months.forEach((m, i) => monthSel.innerHTML += `<option value="${i+1}">${m}</option>`);
+  const currentYear = new Date().getFullYear();
+  for(let i=currentYear; i>=currentYear-100; i--) yearSel.innerHTML += `<option value="${i}">${i}</option>`;
+}
+
+function updateAuthNav(){
+  if(currentUser) {
+    $('navPublic').classList.add('hidden');
+    $('navPrivate').classList.remove('hidden');
+  } else {
+    $('navPublic').classList.remove('hidden');
+    $('navPrivate').classList.add('hidden');
+    $('navAdminLink').classList.add('hidden');
+  }
+}
+function handleLogoClick(){ if(currentUser) showServices(); else showPublicHome(); }
+function hideViews(){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); }
+function showPublicHome(){ hideViews(); $('publicHomeView').classList.add('active'); window.scrollTo(0,0); }
+function showServices(){ if(!currentUser){ openAuth(); return; } hideViews(); $('servicesView').classList.add('active'); window.scrollTo(0,0); }
+function showPersonalArea(){ if(!currentUser){openAuth();return;} hideViews(); $('personalView').classList.add('active'); renderDashboard(); window.scrollTo(0,0); }
+
+/* =========================================
+   NOUVELLE FONCTIONNALITÉ : PROFIL
+   ========================================= */
+function showProfile() {
+    if(!currentUser) { openAuth(); return; }
+    if(!currentUserProfile) { alert("Erro ao carregar o perfil."); return; }
+    
+    hideViews();
+    $('profileView').classList.add('active');
+    window.scrollTo(0,0);
+
+    $('pFullName').value = currentUserProfile.full_name || '';
+    $('pNif').value = currentUserProfile.nif || '';
+    $('pBirthDate').value = currentUserProfile.birth_date || '';
+    $('pPhone').value = currentUserProfile.phone || '';
+    $('pEmail').value = currentUser.email || '';
+    $('pAddress').value = currentUserProfile.address || '';
+    $('pPostalCode').value = currentUserProfile.postal_code || '';
+    $('pCity').value = currentUserProfile.city || '';
+}
+
+async function saveProfile() {
+    const btn = $('profileForm').querySelector('.btn-primary');
+    const originalText = btn.textContent;
+    btn.textContent = 'A guardar...'; btn.disabled = true;
+
+    const updates = {
+        nif: $('pNif').value,
+        birth_date: $('pBirthDate').value || null,
+        phone: $('pPhone').value,
+        address: $('pAddress').value,
+        postal_code: $('pPostalCode').value,
+        city: $('pCity').value
+    };
+
+    const { error } = await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
+
+    btn.textContent = originalText; btn.disabled = false;
+
+    if(error) {
+        alert("Erro ao guardar: " + error.message);
+    } else {
+        alert("Perfil atualizado com sucesso!");
+        await loadUserProfile(); // Recharger les données
+        showPersonalArea();
+    }
+}
+
+let cpTimeoutProfile = null;
+async function fetchPostalCodeProfile(cp) {
+  clearTimeout(cpTimeoutProfile);
+  if (cp.length < 8) return;
+  cpTimeoutProfile = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://json.geoapi.pt/cp/${cp}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.localidade) { $('pCity').value = data.localidade; }
+      }
+    } catch (e) {}
+  }, 600);
+}
+
+/* =========================================
+   NOUVELLE FONCTIONNALITÉ : ADMIN
+   ========================================= */
+async function showAdminPanel() {
+    if(!currentUser || !currentUserProfile || !currentUserProfile.is_admin) { alert("Acesso negado."); return; }
+    hideViews();
+    $('adminView').classList.add('active');
+    window.scrollTo(0,0);
+    await fetchAllApplications();
+}
+
+async function fetchAllApplications() {
+    const container = $('adminTableContainer');
+    container.innerHTML = '<p style="text-align:center; color:var(--muted);">A carregar...</p>';
+
+    // On récupère toutes les demandes
+    const { data: apps, error } = await supabaseClient
+        .from('applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if(error) { container.innerHTML = `<p style="color:red;">Erro: ${error.message}</p>`; return; }
+    if(!apps || apps.length === 0) { container.innerHTML = '<p style="text-align:center;">Ainda não existem pedidos.</p>'; return; }
+
+    let html = `<table class="data-table">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Protocolo</th>
+                <th>Serviço</th>
+                <th>Candidato</th>
+                <th>Estado</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    apps.forEach(app => {
+        const date = new Date(app.created_at).toLocaleDateString('pt-PT');
+        const candidate = (app.form_data.name || '') + ' ' + (app.form_data.surname || '');
+        
+        let selectHtml = `<select onchange="updateApplicationStatus('${app.id}', this.value)" style="background:#f8fafc;">`;
+        ['submetido', 'em análise', 'aprovado', 'rejeitado'].forEach(status => {
+            selectHtml += `<option value="${status}" ${app.status === status ? 'selected' : ''}>${status.toUpperCase()}</option>`;
+        });
+        selectHtml += `</select>`;
+
+        html += `
+            <tr>
+                <td>${date}</td>
+                <td><strong style="font-family:monospace;">${app.protocol}</strong></td>
+                <td>${app.service_type}</td>
+                <td>${candidate}</td>
+                <td>${selectHtml}</td>
+                <td><button class="btn btn-light" style="padding:6px 10px; font-size:12px;" onclick="downloadReceiptAsAdmin('${app.protocol}')">📄 PDF</button></td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+
+    // On garde en mémoire pour le téléchargement PDF côté admin
+    currentUserApplications = apps; 
+}
+
+async function updateApplicationStatus(appId, newStatus) {
+    const { error } = await supabaseClient.from('applications').update({ status: newStatus }).eq('id', appId);
+    if(error) alert("Erro ao atualizar: " + error.message);
+    else {
+        // Optionnel : Recharger le tableau pour confirmer visuellement
+        // await fetchAllApplications(); 
+    }
+}
+
+/* =========================================
+   FONCTIONS EXISTANTES (Auth, Form, PDF)
+   ========================================= */
+
+function openAuth(){ if(currentUser){showPersonalArea();return;} setAuthMode('login'); hideViews(); $('authView').classList.add('active'); window.scrollTo(0,0); }
+function setAuthMode(mode){
+  const isLogin = mode === 'login';
+  $('loginTab').className = 'btn ' + (isLogin ? 'btn-primary' : 'btn-light');
+  $('registerTab').className = 'btn ' + (isLogin ? 'btn-light' : 'btn-primary');
+  $('loginFields').classList.toggle('hidden', !isLogin);
+  $('regStep1').classList.add('hidden');
+  $('regStep2').classList.add('hidden');
+  $('regConfirmEmail').classList.add('hidden');
+  clearInterval(otpTimerInterval);
+  if(!isLogin) { $('regStep1').classList.remove('hidden'); }
+  document.querySelectorAll('.error').forEach(e=>e.textContent='');
+}
+function togglePassword(inputId) { const input = $(inputId); input.type = input.type === "password" ? "text" : "password"; }
+
+function nextRegStep1() {
+  $('regDateError').textContent = '';
+  const nameValid = validateField($('regName'));
+  const surnameValid = validateField($('regSurname'));
+  const d = $('regDay').value, m = $('regMonth').value, y = $('regYear').value;
+  if(!d || !m || !y) { $('regDateError').textContent = 'Por favor, selecione a data completa.'; return; }
+  const birthDate = new Date(y, m-1, d); const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) { age--; }
+  if(age < 16) { $('regDateError').textContent = 'Deve ter pelo menos 16 anos para se registar.'; return; }
+  if(nameValid && surnameValid) { $('regStep1').classList.add('hidden'); $('regStep2').classList.remove('hidden'); }
+}
+function prevRegStep2() { $('regStep2').classList.add('hidden'); $('regStep1').classList.remove('hidden'); }
+
+async function submitRegister() {
+  $('regError').textContent = '';
+  if(!validateField($('regEmail')) || !validateField($('regPhone')) || !validateField($('regPassword')) || !validateField($('regPasswordConfirm'))) return;
+  if($('regPassword').value !== $('regPasswordConfirm').value) { $('regPasswordConfirm').parentElement.querySelector('.error').textContent = 'As palavras-passe não coincidem.'; return; }
+  if(!$('regPrivacy').checked) { $('regError').textContent = 'Deve aceitar a Política de Privacidade.'; return; }
+
+  const email = $('regEmail').value;
+  const password = $('regPassword').value;
+  const btn = document.querySelector('#regStep2 .btn-primary');
+  const originalText = btn.textContent;
+  btn.textContent = 'A enviar...'; btn.disabled = true;
+
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+  btn.textContent = originalText; btn.disabled = false;
+
+  if (error) { $('regError').textContent = error.message; return; }
+
+  $('otpEmailDisplay').textContent = email;
+  $('otpCodeInput').value = ''; $('otpError').textContent = '';
+  $('regStep2').classList.add('hidden'); $('regConfirmEmail').classList.remove('hidden');
+  startOtpTimer();
+}
+
+function startOtpTimer() {
+  clearInterval(otpTimerInterval);
+  let timeLeft = OTP_TIME_LIMIT;
+  $('otpTimerDisplay').textContent = '02:00';
+  $('resendOtpBtn').disabled = true;
+  otpTimerInterval = setInterval(() => {
+    timeLeft--;
+    const minutes = Math.floor(timeLeft / 60), seconds = timeLeft % 60;
+    $('otpTimerDisplay').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    if (timeLeft <= 0) { clearInterval(otpTimerInterval); $('otpTimerDisplay').textContent = '00:00'; $('resendOtpBtn').disabled = false; }
+  }, 1000);
+}
+
+async function resendOtp() { 
+  $('otpCodeInput').value = ''; $('otpError').textContent = ''; 
+  $('resendOtpBtn').disabled = true;
+  $('resendOtpBtn').textContent = 'A enviar...';
+  const email = $('regEmail').value;
+  const { error } = await supabaseClient.auth.resend({ type: 'signup', email });
+  $('resendOtpBtn').textContent = 'Reenviar código';
+  if (error) { $('otpError').textContent = error.message; $('resendOtpBtn').disabled = false; return; }
+  startOtpTimer(); 
+}
+
+async function verifyOtp() {
+  const code = $('otpCodeInput').value.trim();
+  $('otpError').textContent = '';
+  if(code.length !== 6 || !/^\d+$/.test(code)) { $('otpError').textContent = 'Por favor, insira um código de 6 dígitos.'; return; }
+  const email = $('regEmail').value;
+  const btn = document.querySelector('#regConfirmEmail .btn-primary');
+  const originalText = btn.textContent;
+  btn.textContent = 'A validar...'; btn.disabled = true;
+
+  const { data, error } = await supabaseClient.auth.verifyOtp({ email, token: code, type: 'signup' });
+
+  btn.textContent = originalText; btn.disabled = false;
+
+  if (error) { $('otpError').textContent = 'Código inválido ou expirado. Tente novamente.'; return; }
+
+  clearInterval(otpTimerInterval);
+  currentUser = data.user;
+  await loadUserProfile();
+  updateAuthNav();
+
+  $('regConfirmEmail').innerHTML = `
+    <div class="success-icon" style="background:#dff6eb; color:var(--green);">✓</div>
+    <h3 style="color:var(--navy); margin-bottom:10px;">E-mail confirmado!</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">A sua conta foi ativada com sucesso.</p>
+    <button type="button" class="btn btn-primary" style="width:100%;" onclick="showServices()">Ir para os Serviços</button>
+  `;
+}
+
+async function submitLogin() {
+  $('loginError').textContent = '';
+  if(!validateField($('loginEmail')) || !validateField($('loginPassword'))) return;
+  const email = $('loginEmail').value;
+  const password = $('loginPassword').value;
+  const btn = document.querySelector('#loginFields .btn-primary');
+  const originalText = btn.textContent;
+  btn.textContent = 'A entrar...'; btn.disabled = true;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  btn.textContent = originalText; btn.disabled = false;
+
+  if (error) { $('loginError').textContent = error.message === 'Invalid login credentials' ? 'E-mail ou palavra-passe incorretos.' : error.message; return; }
+
+  if($('authRemember').checked) { localStorage.setItem('cartarumoimt_remember', email); } 
+  else { localStorage.removeItem('cartarumoimt_remember'); }
+
+  currentUser = data.user;
+  await loadUserProfile();
+  updateAuthNav();
+  showServices(); 
+}
+
+function validateField(input){
+  if(!input||input.disabled)return true;
+  const v=input.value.trim(); let msg='';
+  if(input.required&&!v)msg='Obrigatório.';
+  else if(input.type==='email'&&v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))msg='E-mail inválido.';
+  const err=input.parentElement?.querySelector('.error'); if(err)err.textContent=msg;
+  input.classList.toggle('invalid',!!msg); return !msg;
+}
+
+async function renderDashboard() {
+  const d = $('dashboardContainer'), section = $('progressSection'), noProcess = $('noProcessMessage');
+  section.classList.add('hidden'); noProcess.classList.add('hidden');
+  d.innerHTML = '<p style="text-align:center; color:var(--muted);">A carregar os seus processos...</p>';
+  section.classList.remove('hidden');
+  if(!currentUser) return;
+
+  const { data: applications, error } = await supabaseClient.from('applications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+
+  if (error) { d.innerHTML = `<p style="color:var(--red); text-align:center;">Erro ao carregar.</p>`; return; }
+  if (!applications || applications.length === 0) { section.classList.add('hidden'); noProcess.classList.remove('hidden'); return; }
+
+  currentUserApplications = applications;
+  let html = '';
+  
+  applications.forEach((app, index) => {
+    const date = new Date(app.created_at).toLocaleDateString('pt-PT');
+    const isFirst = index === 0; 
+    
+    let statusColor = 'background:#e0f2fe; color:#0284c7;'; 
+    if (app.status === 'submetido') statusColor = 'background:#dcfce7; color:#166534;'; 
+    if (app.status === 'aprovado') statusColor = 'background:#dcfce7; color:#166534; border:1px solid #166534;'; 
+    if (app.status === 'rejeitado') statusColor = 'background:#fee2e2; color:#991b1b;';
+
+    // BOUTONS POUR VOIR LES DOCUMENTS
+    let docsHtml = '';
+    if(app.form_data.files) {
+        docsHtml = `<div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">`;
+        for (const [key, paths] of Object.entries(app.form_data.files)) {
+            if(Array.isArray(paths) && paths.length > 0) {
+                paths.forEach((path, i) => {
+                    const fileName = key === 'identificacao' ? 'Identificação' : (key === 'fotografia' ? 'Fotografia' : (key === 'morada' ? 'Morada' : key));
+                    docsHtml += `<button type="button" class="btn btn-light" style="padding: 6px 10px; font-size: 11px;" onclick="viewDocument('${path}')">👁️ Ver ${fileName} ${paths.length > 1 ? (i+1) : ''}</button>`;
+                });
+            }
+        }
+        docsHtml += `</div>`;
+    }
+
+    html += `
+      <div class="timeline-item completed" style="margin-bottom: 20px;">
+        <div class="timeline-icon" style="background: var(--navy); color: #fff; font-size: 18px;">📄</div>
+        <div class="timeline-content" style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h4 style="margin-bottom: 8px;">${esc(app.service_type)}</h4>
+              <p style="margin-bottom: 4px; font-size: 13px;"><strong>Protocolo:</strong> <span style="font-family: monospace; font-size: 14px; color: var(--navy); font-weight: 700;">${esc(app.protocol)}</span></p>
+              <p style="margin-bottom: 4px; font-size: 13px;"><strong>Categoria:</strong> ${esc(app.category)}</p>
+              <p style="margin-bottom: 4px; font-size: 13px;"><strong>Data:</strong> ${date}</p>
+              ${docsHtml}
+            </div>
+            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+              <span style="${statusColor} padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 11px; text-transform: uppercase;">
+                ${esc(app.status)}
+              </span>
+              <button type="button" class="btn btn-light" style="padding: 8px 12px; font-size: 12px;" onclick="downloadReceiptAsAdmin('${app.protocol}')">
+                📄 PDF
+              </button>
+            </div>
+          </div>
+          ${isFirst && (app.service_type.includes('Inscrição') || app.service_type.includes('Obtenção')) && app.status === 'aprovado' ? `
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--line);">
+              <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Próximo passo: Formação Teórica</p>
+              <button type="button" class="btn btn-primary btn-sm" onclick="startQuizStep()">Iniciar Teste Teórico</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+  d.innerHTML = html;
+}
+
+// VOIR UN DOCUMENT SECURISE
+async function viewDocument(path) {
+    // Génère un lien temporaire valide 60 secondes
+    const { data, error } = await supabaseClient.storage.from('documents').createSignedUrl(path, 60);
+    if(error) { alert("Não foi possível abrir o documento: " + error.message); return; }
+    window.open(data.signedUrl, '_blank');
+}
+
+// PDF GÉNÉRATION (utilisé par User et Admin)
+function viewApplicationDetails(protocol) { downloadReceiptAsAdmin(protocol); }
+
+function downloadReceiptAsAdmin(protocol) {
+    const app = currentUserApplications.find(a => a.protocol === protocol);
+    if (!app) return;
+
+    lastSubmission = {
+        protocol: app.protocol,
+        date: new Date(app.created_at).toLocaleDateString('pt-PT') + ' às ' + new Date(app.created_at).toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'}),
+        service: app.service_type,
+        candidate: app.form_data.name + ' ' + app.form_data.surname,
+        email: app.form_data.email,
+        category: app.category,
+        files: [], 
+        details: {
+            address: app.form_data.address || '—',
+            city: app.form_data.city || '—',
+            nif: app.form_data.nif || '—'
+        }
+    };
+    downloadReceipt();
+}
+
+function startQuizStep() { hideViews(); $('testView').classList.add('active'); startQuiz(); }
+
+function startFlow(service){
+  if(!currentUser){openAuth();return;}
+  applicationState.service = service;
+  applicationState.step = 1;
+  applicationState.category = '';
+  applicationState.files = {};
+  buildFormSteps();
+  hideViews(); 
+  $('applicationView').classList.add('active'); 
+  window.scrollTo(0,0);
+}
+
+function logout(){ supabaseClient.auth.signOut().then(() => { currentUser=null; updateAuthNav(); showPublicHome(); }); }
+
+function buildUnifiedForm() {
+  // (Le code HTML du formulaire reste identique)
+  $('applicationView').innerHTML = `
+    <div class="form-shell">
+      <div class="form-title">
+        <div><button type="button" class="btn btn-ghost" onclick="showPersonalArea()">← Voltar</button><h2 id="formTitle">Carregando...</h2><p id="formSubtitle"></p></div>
+      </div>
+      <form id="unifiedForm" novalidate>
+        <div class="step" data-step="1">
+          <h3>Identificação Pessoal</h3><p class="step-intro">Preencha os seus dados pessoais.</p>
+          <div class="fields">
+            <div class="field"><label>Nome Próprio *</label><input id="uName" required><span class="error"></span></div>
+            <div class="field"><label>Apelido *</label><input id="uSurname" required><span class="error"></span></div>
+            <div class="field"><label>Data de Nascimento *</label><input id="uBirth" type="date" required onchange="checkAgeAndGuardian()"><span class="error"></span></div>
+            <div class="field"><label>Género *</label><select id="uGender" required><option value="">Selecione</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select><span class="error"></span></div>
+            <div class="field"><label>Nacionalidade *</label><input id="uNationality" required placeholder="Ex: Portuguesa"><span class="error"></span></div>
+            <div class="field"><label>Naturalidade *</label><input id="uBirthPlace" required placeholder="Ex: Lisboa"><span class="error"></span></div>
+            <div class="field"><label>NIF *</label><input id="uNif" inputmode="numeric" required><span class="error"></span></div>
+          </div>
+          <div id="guardianBlock" class="hidden" style="background: var(--blue-light); padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid #bae6fd;">
+            <h4 style="color: var(--navy); margin: 0 0 15px;">Informações do Representante Legal</h4>
+            <div class="fields">
+              <div class="field"><label>Nome Completo *</label><input id="uRepName"><span class="error"></span></div>
+              <div class="field"><label>NIF *</label><input id="uRepNif"><span class="error"></span></div>
+              <div class="field"><label>Telemóvel *</label><input id="uRepPhone" type="tel"><span class="error"></span></div>
+              <div class="field"><label>E-mail *</label><input id="uRepEmail" type="email"><span class="error"></span></div>
+              <div class="field"><label>Tipo de Documento *</label><select id="uRepIdType"><option value="">Selecione</option><option>Cartão de Cidadão</option><option>Passaporte</option></select><span class="error"></span></div>
+              <div class="field"><label>Número do Documento *</label><input id="uRepIdNumber"><span class="error"></span></div>
+            </div>
+            <div id="a1AuthWrap" class="checkline hidden" style="margin-top: 15px; background: #fff3cd; padding: 10px; border-radius: 8px;">
+              <input id="uA1Auth" type="checkbox"><span><strong>Autorização A1:</strong> Declaro que tenho a autorização do meu representante legal para me inscrever na categoria A1.</span>
+            </div>
+          </div>
+          <div class="step-actions"><button type="button" class="btn btn-light" onclick="showPersonalArea()">← Cancelar</button><button type="button" class="btn btn-primary" onclick="nextStep()">Seguinte →</button></div>
+        </div>
+        <div class="step" data-step="2">
+          <h3>Contactos e Morada</h3>
+          <div class="fields">
+            <div class="field full"><label>Endereço Completo *</label><input id="uAddress" required><span class="error"></span></div>
+            <div class="field"><label>Código Postal *</label><input id="uPostalCode" required placeholder="0000-000" maxlength="8" oninput="fetchPostalCode(this.value)"><span class="error"></span></div>
+            <div class="field"><label>Localidade *</label><input id="uCity" required><span class="error"></span></div>
+            <div class="field"><label>Telemóvel *</label><input id="uPhone" type="tel" required><span class="error"></span></div>
+            <div class="field"><label>E-mail *</label><input id="uEmail" type="email" required><span class="error"></span></div>
+          </div>
+          <div class="step-actions"><button type="button" class="btn btn-light" onclick="prevStep()">← Anterior</button><button type="button" class="btn btn-primary" onclick="nextStep()">Seguinte →</button></div>
+        </div>
+        <div class="step" data-step="3">
+          <h3>Documento de Identificação</h3>
+          <div class="fields">
+            <div class="field"><label>Tipo *</label><select id="uIdType" required><option value="">Selecione</option><option>Cartão de Cidadão</option><option>Passaporte</option></select><span class="error"></span></div>
+            <div class="field"><label>Número *</label><input id="uIdNumber" required><span class="error"></span></div>
+            <div class="field"><label>Emissão *</label><input id="uIdIssue" type="date" required><span class="error"></span></div>
+            <div class="field"><label>Validade *</label><input id="uIdExpiry" type="date" required><span class="error"></span></div>
+          </div>
+          <div class="step-actions"><button type="button" class="btn btn-light" onclick="prevStep()">← Anterior</button><button type="button" class="btn btn-primary" onclick="nextStep()">Seguinte →</button></div>
+        </div>
+        <div class="step" data-step="4">
+          <h3>Detalhes do Pedido</h3>
+          <div class="fields"><div class="field full"><label>Categoria *</label><div class="category-grid" id="uCategories"></div><span class="error" id="uCategoryError"></span></div></div>
+          <div id="serviceSpecificFields" style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 20px;"></div>
+          <div class="step-actions"><button type="button" class="btn btn-light" onclick="prevStep()">← Anterior</button><button type="button" class="btn btn-primary" onclick="nextStep()">Seguinte →</button></div>
+        </div>
+        <div class="step" data-step="5">
+          <h3>Documentos</h3>
+          <div class="upload-grid" id="uUploads"></div><span class="error" id="uUploadError"></span>
+          <div class="step-actions"><button type="button" class="btn btn-light" onclick="prevStep()">← Anterior</button><button type="button" class="btn btn-primary" onclick="nextStep()">Seguinte →</button></div>
+        </div>
+        <div class="step" data-step="6">
+          <h3>Confirmação</h3>
+          <div class="summary-grid" id="uSummary"></div>
+          <label class="checkline"><input id="uConfirm" type="checkbox"><span>Confirmo que os dados estão corretos.</span></label><span class="error" id="uConfirmError"></span>
+          <div class="step-actions"><button type="button" class="btn btn-light" onclick="prevStep()">← Anterior</button><button type="button" class="btn btn-red" onclick="submitUnifiedForm()">Submeter</button></div>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function buildFormSteps() {
+  const titles = { 'obtencao': 'Obtenção de Carta', 'inscricao': 'Inscrição – Aulas', 'renovacao': 'Renovação de Carta', 'substituicao': 'Substituição de Carta' };
+  $('formTitle').textContent = titles[applicationState.service];
+  
+  let specificHtml = '';
+  if (applicationState.service === 'renovacao') {
+    specificHtml = `<div class="fields"><div class="field"><label>Número da Carta *</label><input id="sLicenseNumber" required></div><div class="field"><label>Validade *</label><input id="sLicenseExpiry" type="date" required></div><div class="field full"><label class="checkline"><input type="checkbox" id="sConfirmAddress" required> Confirmo a morada.</label></div><div class="field full"><p style="font-size:13px; background:#eef6ff; padding:10px;"><strong>Aviso:</strong> O atestado médico será tratado internamente.</p></div></div>`;
+  } else if (applicationState.service === 'substituicao') {
+    specificHtml = `<div class="fields"><div class="field"><label>Número da Carta (se conhecido)</label><input id="sLicenseNumber"></div><div class="field"><label>Motivo *</label><select id="sReason" required><option value="">Selecione</option><option>Perda</option><option>Roubo</option><option>Deterioração</option></select></div><div class="field full"><label>Endereço de Entrega *</label><input id="sDeliveryAddress" required></div></div>`;
+  } else if (applicationState.service === 'obtencao') {
+    specificHtml = `<div class="fields"><div class="field full"><p style="font-size:13px; background:#eef6ff; padding:10px;"><strong>Aviso:</strong> O atestado médico será tratado internamente.</p></div></div>`;
+  }
+  $('serviceSpecificFields').innerHTML = specificHtml;
+
+  const g = $('uCategories');
+  g.innerHTML = categoryList.map(c=>`<button type="button" class="category ${applicationState.category===c?'selected':''}" data-category="${c}"><strong>${c}</strong><small>${esc(categories[c])}</small></button>`).join('');
+  g.querySelectorAll('.category').forEach(b=>b.onclick=()=>{
+    applicationState.category=b.dataset.category; applicationState.isA1 = (b.dataset.category === 'A1');
+    g.querySelectorAll('.category').forEach(i=>i.classList.toggle('selected',i===b)); $('uCategoryError').textContent=''; checkAgeAndGuardian(); 
+  });
+  renderUploads(); renderStep();
+}
+
+function renderUploads() {
+  const box = $('uUploads');
+  let docs = [
+    ['identificacao', 'Documento de Identificação (Recto/Verso)', true, 'Pode selecionar 2 ficheiros.'],
+    ['fotografia', 'Fotografia recente (tipo passe)', true, 'Fundo claro, sem acessórios.'],
+    ['morada', 'Justificativo de Morada', true, 'Factura recente.']
+  ];
+  if (applicationState.service === 'renovacao') docs.push(['carta_antiga', 'Cópia da Carta Antiga', true, '']);
+  if (applicationState.isMinor) docs.push(['autorizacao', 'Autorização Parental', true, 'Assinada.']);
+
+  box.innerHTML = docs.map(([k,l,r,help]) => `
+    <div class="upload ${r?'required':''}"><div class="upload-head"><span class="upload-icon">▣</span><span class="upload-name">${l}${r?' *':''}</span></div>
+    <input type="file" id="uFile-${k}" accept=".pdf,.jpg,.jpeg,.png" multiple><label for="uFile-${k}">Selecionar</label>
+    ${help ? `<span class="help-text">${help}</span>` : ''}<span class="upload-info" id="uInfo-${k}">${r?'Obrigatório':'Nenhum'}</span>
+    <button type="button" class="remove-file hidden" id="uRemove-${k}">Remover</button></div>
+  `).join('');
+
+  docs.forEach(([k,l,r])=>{
+    const inp=$(`uFile-${k}`), rm=$(`uRemove-${k}`), inf=$(`uInfo-${k}`);
+    inp.onchange=()=>{ const files = Array.from(inp.files); if(files.length === 0) return; applicationState.files[k] = files; inf.textContent = files.map(f=>f.name).join(', '); rm.classList.remove('hidden'); $('uUploadError').textContent=''; };
+    rm.onclick=()=>{inp.value='';delete applicationState.files[k];inf.textContent=r?'Obrigatório':'Nenhum';rm.classList.add('hidden');};
+  });
+}
+
+function renderStep() {
+  const c = $('applicationView');
+  c.querySelectorAll('.step').forEach(s=>s.classList.toggle('active', +s.dataset.step === applicationState.step));
+  if(applicationState.step === 6) buildSummary();
+  window.scrollTo(0,0);
+}
+
+function nextStep() { if(!validateCurrentStep()) return; if(applicationState.step < 6) { applicationState.step++; renderStep(); } }
+function prevStep() { if(applicationState.step > 1) { applicationState.step--; renderStep(); } }
+
+function validateCurrentStep() {
+  const s = $('applicationView').querySelector('.step.active'); if(!s) return false; let v = true;
+  s.querySelectorAll('input:not([type="checkbox"]),select').forEach(i=>{ if(i.closest('.hidden')) return; if(!validateField(i) || !i.checkValidity()) v = false; });
+  if(applicationState.step === 4) { if(!applicationState.category) { $('uCategoryError').textContent = 'Selecione.'; v = false; } if(applicationState.service === 'renovacao' && !$('sConfirmAddress').checked) v = false; }
+  if(applicationState.step === 5) {
+    let req = ['identificacao', 'fotografia', 'morada']; if (applicationState.service === 'renovacao') req.push('carta_antiga'); if (applicationState.isMinor) req.push('autorizacao');
+    for (let doc of req) { if (!applicationState.files[doc] || applicationState.files[doc].length === 0) { $('uUploadError').textContent = 'Carregue os documentos obrigatórios.'; v = false; break; } }
+  }
+  return v;
+}
+
+function checkAgeAndGuardian() {
+  const birthVal = $('uBirth').value; if(!birthVal) return;
+  const birthDate = new Date(birthVal); const today = new Date(); let age = today.getFullYear() - birthDate.getFullYear(); const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+  applicationState.isMinor = (age >= 16 && age < 18);
+  $('guardianBlock').classList.toggle('hidden', !applicationState.isMinor);
+  if (applicationState.isMinor && applicationState.isA1) $('a1AuthWrap').classList.remove('hidden'); else { $('a1AuthWrap').classList.add('hidden'); if($('uA1Auth')) $('uA1Auth').checked = false; }
+  if($('uUploads').innerHTML !== '') renderUploads();
+}
+
+let cpTimeout = null;
+async function fetchPostalCode(cp) {
+  clearTimeout(cpTimeout); if (cp.length < 8) return;
+  cpTimeout = setTimeout(async () => { try { const res = await fetch(`https://json.geoapi.pt/cp/${cp}`); if (res.ok) { const data = await res.json(); if (data && data.localidade) $('uCity').value = data.localidade; } } catch (e) {} }, 600);
+}
+
+function buildSummary() {
+  const summary = $('uSummary'); const specificFields = [];
+  if (applicationState.service === 'renovacao') { specificFields.push(['Número da Carta', $('sLicenseNumber').value]); specificFields.push(['Validade', $('sLicenseExpiry').value]); }
+  else if (applicationState.service === 'substituicao') { specificFields.push(['Número da Carta', $('sLicenseNumber').value || '—']); specificFields.push(['Motivo', $('sReason').value]); specificFields.push(['Entrega', $('sDeliveryAddress').value]); }
+  const fileNames = (key) => applicationState.files[key] ? applicationState.files[key].map(f=>f.name).join(', ') : '—';
+  summary.innerHTML = `
+    <div class="summary-card"><h4>Dados Pessoais <button onclick="goToStep(1)">Editar</button></h4><dl><dt>Nome</dt><dd>${$('uName').value} ${$('uSurname').value}</dd><dt>NIF</dt><dd>${$('uNif').value}</dd></dl></div>
+    <div class="summary-card"><h4>Contactos <button onclick="goToStep(2)">Editar</button></h4><dl><dt>Morada</dt><dd>${$('uAddress').value}</dd><dt>CP / Cidade</dt><dd>${$('uPostalCode').value} ${$('uCity').value}</dd></dl></div>
+    <div class="summary-card"><h4>ID <button onclick="goToStep(3)">Editar</button></h4><dl><dt>Tipo</dt><dd>${$('uIdType').value}</dd><dt>Número</dt><dd>${$('uIdNumber').value}</dd></dl></div>
+    <div class="summary-card"><h4>Pedido <button onclick="goToStep(4)">Editar</button></h4><dl><dt>Serviço</dt><dd>${$('formTitle').textContent}</dd><dt>Categoria</dt><dd>${applicationState.category}</dd>${specificFields.map(f => `<dt>${f[0]}</dt><dd>${f[1]}</dd>`).join('')}</dl></div>
+    <div class="summary-card" style="grid-column: 1/-1;"><h4>Docs <button onclick="goToStep(5)">Editar</button></h4><dl><dt>Identificação</dt><dd>${fileNames('identificacao')}</dd><dt>Fotografia</dt><dd>${fileNames('fotografia')}</dd><dt>Morada</dt><dd>${fileNames('morada')}</dd>${applicationState.service === 'renovacao' ? `<dt>Carta Antiga</dt><dd>${fileNames('carta_antiga')}</dd>` : ''}${applicationState.isMinor ? `<dt>Autorização</dt><dd>${fileNames('autorizacao')}</dd>` : ''}</dl></div>
+  `;
+}
+function goToStep(step) { applicationState.step = step; renderStep(); }
+
+async function submitUnifiedForm() {
+  if(!$('uConfirm').checked) { $('uConfirmError').textContent = 'Deve confirmar os dados.'; return; }
+  $('loadingOverlay').classList.remove('hidden');
+  try {
+    const now = new Date(); const protocol = `AUTO-${now.getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`; let serviceName = $('formTitle').textContent;
+    
+    // 1. Mise à jour du profil
+    const profileData = { id: currentUser.id, full_name: $('uName').value + ' ' + $('uSurname').value, nif: $('uNif').value, birth_date: $('uBirth').value, phone: $('uPhone').value, address: $('uAddress').value, city: $('uCity').value, postal_code: $('uPostalCode').value };
+    await supabaseClient.from('profiles').upsert(profileData, { onConflict: 'id' });
+
+    // 2. Upload des fichiers
+    const uploadedFilesPaths = {};
+    for (const [key, files] of Object.entries(applicationState.files)) {
+      uploadedFilesPaths[key] = [];
+      for (const file of files) {
+        const filePath = `${currentUser.id}/${protocol}/${key}-${file.name}`;
+        await supabaseClient.storage.from('documents').upload(filePath, file);
+        uploadedFilesPaths[key].push(filePath);
+      }
+    }
+
+    // 3. Création de la demande
+    const formData = { name: $('uName').value, surname: $('uSurname').value, email: $('uEmail').value, licenseNumber: $('sLicenseNumber') ? $('sLicenseNumber').value : null, reason: $('sReason') ? $('sReason').value : null, files: uploadedFilesPaths };
+    await supabaseClient.from('applications').insert([{ user_id: currentUser.id, service_type: serviceName, category: applicationState.category, protocol: protocol, form_data: formData }]);
+
+    // 4. Affichage
+    lastSubmission = { protocol: protocol, date: now.toLocaleDateString('pt-PT') + ' às ' + now.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'}), service: serviceName, candidate: profileData.full_name, email: formData.email, category: applicationState.category, files: [], details: { address: profileData.address, city: profileData.city, nif: profileData.nif } };
+    $('succProtocol').textContent = lastSubmission.protocol; $('succDate').textContent = lastSubmission.date; $('succService').textContent = lastSubmission.service; $('succCandidate').textContent = lastSubmission.candidate;
+
+    hideViews(); $('successView').classList.add('active'); window.scrollTo(0, 0);
+  } catch (error) { alert("Erro: " + error.message); } finally { $('loadingOverlay').classList.add('hidden'); }
+}
+
+async function downloadReceipt() {
+  if(!lastSubmission) return;
+  // ... (Le code du PDF reste inchangé, voir réponse précédente)
+  const pdfTemplate = `
+    <div style="background: #dbeafe; width: 800px; padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid #0b3a6e; margin-bottom: 30px;">
+          <div style="display: flex; align-items: center; gap: 15px; color: #0b3a6e;"><svg viewBox="0 0 100 100" style="width: 50px; height: 50px;" xmlns="http://www.w3.org/2000/svg"><path d="M 70 25 A 35 35 0 1 0 70 75" stroke="#0b3a6e" stroke-width="10" fill="none" stroke-linecap="round" /><path d="M 45 40 L 45 70 M 45 40 L 60 40 A 10 10 0 0 1 60 60 L 45 60 L 65 70" stroke="#e30613" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" /><circle cx="75" cy="50" r="5" fill="#e30613" /></svg><div style="display: flex; flex-direction: column;"><span style="font-size: 20pt; font-weight: 900; letter-spacing: 0.5px; line-height: 1;">CartaRumo</span><span style="font-size: 8.5pt; font-weight: 600; color: #475569; margin-top: 4px; letter-spacing: 1px; text-transform: uppercase;">Serviço-IMT</span></div></div>
+          <div style="display: flex; align-items: center; justify-content: center;"><div style="background: #fff; padding: 8px 15px; border-radius: 8px; border: 9px solid #0b3a6e; width: 170px; height: 55px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;"><img crossorigin="anonymous" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Log%C3%B3tipo_do_Governo_Portugal.svg/500px-Log%C3%B3tipo_do_Governo_Portugal.svg.png" style="max-width: 90%; max-height: 90%; object-fit: contain;"></div></div>
+          <div style="display: flex; align-items: center; justify-content: center;"><div style="background: #fff; padding: 8px 15px; border-radius: 8px; border: 9px solid #0b3a6e; width: 170px; height: 55px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;"><img crossorigin="anonymous" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDJEYAJPMDyZz866YqX3BtRSuf1rXYkfup8uO0ehEezHLqfuzIu-rtCs6e&s=10" style="max-width: 90%; max-height: 90%; object-fit: contain;"></div></div>
+      </div>
+      <div style="text-align: center; margin-bottom: 30px;"><h1 style="font-size: 22pt; font-weight: 800; color: #0b3a6e; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Comprovativo</h1><div style="font-size: 9pt; color: #475569; margin-top: 4px;">Gerado eletronicamente</div></div>
+      <div style="background: #fff; border: 1px solid #bfdbfe; border-left: 6px solid #0b3a6e; border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div><div style="font-size: 8pt; font-weight: 800; color: #0b3a6e; text-transform: uppercase;">Protocolo</div><h2 style="font-size: 20pt; font-weight: 900; color: #e30613; margin: 5px 0 0 0; line-height: 1;">${lastSubmission.protocol}</h2></div>
+          <div style="text-align: right;"><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">Estado</div><div style="background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 9pt; text-transform: uppercase; margin-top: 5px;">Recebido</div><div style="font-size: 8.5pt; color: #475569; margin-top: 8px;">${lastSubmission.date}</div></div>
+      </div>
+      <div style="background: #fff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+          <div style="font-size: 12pt; font-weight: 800; color: #0b3a6e; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px;">Dados</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"><div><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">Nome</div><div style="font-size: 11pt; font-weight: 600;">${lastSubmission.candidate}</div></div><div><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">E-mail</div><div style="font-size: 11pt; font-weight: 600;">${lastSubmission.email}</div></div><div><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">NIF</div><div style="font-size: 11pt; font-weight: 600;">${lastSubmission.details.nif}</div></div></div>
+      </div>
+      <div style="background: #fff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+          <div style="font-size: 12pt; font-weight: 800; color: #0b3a6e; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px;">Submissão</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"><div><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">Serviço</div><div style="font-size: 11pt; font-weight: 600;">${lastSubmission.service}</div></div><div><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">Categoria</div><div style="font-size: 11pt; font-weight: 600;">${lastSubmission.category}</div></div><div style="grid-column: 1/-1;"><div style="font-size: 8pt; font-weight: 800; color: #64748b; text-transform: uppercase;">Morada</div><div style="font-size: 11pt; font-weight: 600;">${lastSubmission.details.address}, ${lastSubmission.details.city}</div></div></div>
+      </div>
+      <div style="text-align: center; font-size: 8pt; color: #94a3b8; margin-top: 30px;">Documento gerado em ${new Date().toLocaleDateString('pt-PT')}.</div>
+    </div>
+  `;
+  const container = document.createElement('div'); container.style.position = 'fixed'; container.style.left = '-9999px'; container.innerHTML = pdfTemplate; document.body.appendChild(container);
+  const images = container.querySelectorAll('img'); await Promise.all(Array.from(images).map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; })));
+  try {
+    const canvas = await html2canvas(container.firstElementChild, { scale: 2, useCORS: true, allowTaint: false });
+    const imgData = canvas.toDataURL('image/png'); const { jsPDF } = window.jspdf; const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); pdf.save(`CartaRumo_${lastSubmission.protocol}.pdf`);
+  } catch (err) { alert("Erro ao gerar PDF."); } finally { document.body.removeChild(container); }
+}
+
+/* QUIZ */
+const quizData=[{q:'Qual é a taxa máxima de álcool para um condutor em regime probatório?',options:['0,2 g/l','0,5 g/l'],answer:0},{q:'A que distância mínima deve ser colocado o triângulo?',options:['30 m','50 m'],answer:0},{q:'Qual é a velocidade máxima geral em autoestrada?',options:['120 km/h','130 km/h'],answer:0}];
+let qi=0, qs=0;
+function startQuiz(){qi=0;qs=0;renderQuizQuestion();}
+function renderQuizQuestion(){
+  const b=$('quizContainer');
+  if(qi>=quizData.length){
+    const passed = qs === quizData.length;
+    b.innerHTML=`<div class="success-card" style="box-shadow:none;border:0;"><h2>${passed ? 'Aprovado!' : 'Não foi desta vez'}</h2><p>Acertou ${qs} de ${quizData.length}.</p><div style="margin-top:20px; display:flex; gap:10px; justify-content:center;"><button type="button" class="btn btn-primary" onclick="${passed ? 'showPersonalArea()' : 'startQuizStep()'}">${passed ? 'Ir para o Painel' : 'Repetir Teste'}</button></div></div>`;
+    return;
+  }
+  const item=quizData[qi];
+  b.innerHTML=`<div class="quiz-progress">Questão ${qi+1} de ${quizData.length}</div><div class="quiz-question"><h3>${esc(item.q)}</h3><div class="quiz-options">${item.options.map((o,i)=>`<button type="button" class="quiz-option" onclick="answerQuiz(${i})">${esc(o)}</button>`).join('')}</div><div class="quiz-feedback" id="quizFeedback"></div></div>`;
+}
+function answerQuiz(i){
+  const item=quizData[qi]; const btns=document.querySelectorAll('.quiz-option'); btns.forEach(b=>b.disabled=true);
+  if(i===item.answer){btns[i].classList.add('correct');$('quizFeedback').textContent='Correto!';$('quizFeedback').style.color='var(--green)';qs++;} 
+  else {btns[i].classList.add('wrong');btns[item.answer].classList.add('correct');$('quizFeedback').textContent='Errado.';$('quizFeedback').style.color='var(--red)';}
+  setTimeout(()=>{qi++;renderQuizQuestion();},1500);
+}
+</script>
+</body>
+</html>
